@@ -179,24 +179,24 @@ websocket.on("message", async function incoming(data) {
             //creating requests to update spreadsheet with new info
             let winRequest = {
                 "spreadsheetId": winSpreadsheetId,
-                "range": `${winTableName}!C9:I19`,
+                "range": `${winTableName}!H14:O24`,
                 "includeValuesInResponse": false,
                 "responseValueRenderOption": "FORMATTED_VALUE",
                 "valueInputOption": "USER_ENTERED",
                 "resource": {
-                    "range": `${winTableName}!C9:I19`,
+                    "range": `${winTableName}!H14:O24`,
                     "values": winPokeInfo.data.values
                 },
                 "auth": client
             };
             let loseRequest = {
                 "spreadsheetId": loseSpreadsheetId,
-                "range": `${loseTableName}!C9:I19`,
+                "range": `${loseTableName}!H14:O24`,
                 "includeValuesInResponse": false,
                 "responseValueRenderOption": "FORMATTED_VALUE",
                 "valueInputOption": "USER_ENTERED",
                 "resource": {
-                    "range": `${loseTableName}!C9:I19`,
+                    "range": `${loseTableName}!H14:O24`,
                     "values": losePokeInfo.data.values
                 },
                 "auth": client
@@ -209,7 +209,6 @@ websocket.on("message", async function incoming(data) {
                 //updating Games Played and Games Won
                 if (winPoke in killJson || winPoke in deathJson) {
                     winRequest.resource.values[i][3] = (parseInt(winRequest.resource.values[i][3]) + 1).toString();
-                    winRequest.resource.values[i][4] = (parseInt(winRequest.resource.values[i][4]) + 1).toString();
                 }
                 if (losePoke in killJson || losePoke in deathJson) {
                     loseRequest.resource.values[i][3] = (parseInt(loseRequest.resource.values[i][3]) + 1).toString();
@@ -217,14 +216,14 @@ websocket.on("message", async function incoming(data) {
 
                 //updating winner pokemon info
                 if (killJson[winPoke] >= 0)
-                    winRequest.resource.values[i][5] = (killJson[winPoke] + parseInt(winRequest.resource.values[i][5])).toString();
+                    winRequest.resource.values[i][4] = (killJson[winPoke] + parseInt(winRequest.resource.values[i][4])).toString();
                 if (deathJson[winPoke] >= 0)
-                    winRequest.resource.values[i][6] = (deathJson[winPoke] + parseInt(winRequest.resource.values[i][6])).toString();
+                    winRequest.resource.values[i][5] = (deathJson[winPoke] + parseInt(winRequest.resource.values[i][5])).toString();
                 //updating loser pokemon info
                 if (killJson[losePoke] >= 0)
-                    loseRequest.resource.values[i][5] = (killJson[losePoke] + parseInt(loseRequest.resource.values[i][5])).toString();
+                    loseRequest.resource.values[i][4] = (killJson[losePoke] + parseInt(loseRequest.resource.values[i][4])).toString();
                 if (deathJson[losePoke] >= 0)
-                    loseRequest.resource.values[i][6] = (deathJson[losePoke] + parseInt(loseRequest.resource.values[i][6])).toString();
+                    loseRequest.resource.values[i][5] = (deathJson[losePoke] + parseInt(loseRequest.resource.values[i][5])).toString();
             }
 
             console.log("killjson: ", killJson);
@@ -327,68 +326,123 @@ const sheets = google.sheets({
 });
 async function getTableId(showdownName) {
     //"showdownName":"SHEETNAME"
-    const majors = {
-        "beastnugget35": "DS",
-        "e24mcon": "BBP",
-        "Killer Mojo": "LLL",
-        "JDMR98": "JDMR",
-        "SpooksLite": "DTD",
-        "Talal_23": "SoF",
-        "I am TheDudest": "TDD",
-        "M UpSideDown W": "USD",
-        "CinnabarCyndaquil": "CCQ",
-        "pop5isaac": "ELA",
-        "Vienna Vullabies": "VVB",
-        "tiep123": "ORR",
-        "LimitBroKe": "MCM",
-        "a7x2567": "NYP",
-        "jelani": "Lani",
-        "pickle brine": "PPK"
+    let aDiv = {
+        "CheezitzZ": "MGM",
+        "Chris_YGOPRO": "HHG",
+        "ManciniTheAmazing": "ITL",
+        "TheJerseyFitz": "TNT",
+        "joe_pick": "TXA",
+        "JoltsOfEnergy": "ADA",
+        "Hylia Aria": "PIX",
+        "Lunatic": "ACE",
+        "Majoras_Mask4343": "LVN",
+        "Kraknoix007": "PPC",
+        "Skyquake29": "LCL",
+        "stumbles23": "CLV",
+        "the real fake josh": "LAJ",
+        "TOOXIC860": "TTD",
+        "yoPierre14": "EFC",
+        "Kaitlyn74": "AOW"
     }
-    const minors = {
-        "GableGames": "MWM",
-        "Mother Runerussia": "RRG",
+    let bDiv = {
+        "PotatoZ4": "RWW",
+        "Habaduh": "GBG",
+        "x_x Insanity": "SCT",
+        "Cradily26": "COL",
+        "Jahken": "GWS",
+        "The Rissoux": "OHM",
+        "NathanDevious": "CHC",
+        "Autumn Leavess": "MHR",
+        "PikachuZappyZap": "SSH",
+        "Risky Ricky": "GSG",
         "Fate LVL": "LVL",
-        "Aaron12pkmn": "LSS",
-        "Wolf iGL": "CKM",
-        "JonnyGoldApple": "UUB",
-        "Mexicanshyguy": "ARD",
-        "SnooZEA": "DDL",
-        "joey34": "DSY",
-        "Gen 4 elitist": "G4E",
-        "HalluNasty": "KCC",
-        "Hi I'm WoW": "WOW",
-        "ChampionDragonites": "ETD",
-        "infernapeisawesome": "SSR",
-        "metsrule97": "HT",
-        "Darkkstar": "BBF",
-        "dominicann": "MMT",
-        "RetroLikesMemes": "GRG"
+        "Tourman": "TKK",
+        "ShrekForSmash": "BUF",
+        "xgamerpokestar": "NDS",
+        "Zimziej": "RDR",
+        "Long Island Lugias": "LIL"
     }
-    //finding out the name of the Table as well as if the league is Minors or Majors
-    let tableName = "";
-    let isMajor = false;
-    if (majors[showdownName]) {
-        isMajor = true;
-        tableName = majors[showdownName];
-    } else if (minors[showdownName]) {
-        isMajor = false;
-        tableName = minors[showdownName];
-    } else {
-        return ["No SheetID", "Invalid Showdown name"];
+    let cDiv = {
+        "Rufus 623": "ABA",
+        "Etesian": "LCL",
+        "GentlemanThomas97": "CHG",
+        "Ultragoomba": "DDG",
+        "SGS_Nim": "SSG",
+        "TheHonch9": "CBL",
+        "dont click forfeit": "NNK",
+        "Coach Paddy": "III",
+        "QwertyTurdy": "MLT",
+        "RoseradeGod": "RVR",
+        "Tax 3vasion": "DWD",
+        "Ryan_Scar": "LOL",
+        "DaStarfeeeeesh": "ONP",
+        "Sacred Wings": "UUT",
+        "Techno6377": "TXM",
+        "VolsAreAwesome23": "CGB"
+    }
+    let dDiv = {
+        "e24mcon": "BBP",
+        "gannon223": "CBC",
+        "umbreofxd": "NEE",
+        "infernapeisawesome": "FSN",
+        "Jeanmachine22": "OGG",
+        "jeltevl": "BPT",
+        "DeeColon": "GGZ",
+        "KaiWhai": "LVL",
+        "Mangle Faz": "GGR",
+        "The Newkbomb": "BCB",
+        "Apples in Angola": "KTK",
+        "Pabloone": "OSD",
+        "Ravens19": "CFF",
+        "sacred_td": "LAD",
+        "Hooyah Tark": "BSB",
+        "Twigz11": "WCW"
     }
 
-    //Gets info about the sheet
-    let spreadsheetId = isMajor ? "1Z0lFg8MFYONpMLia1jrAv9LC5MSJOJByRs3LDKxV0eI" : "1U85VJem_HDDXNCTB8954R1oCs9-ls6W0Micn2q6P-kE";
-    let list = [spreadsheetId, tableName];
-    return list;
+    //Getting player's Division & Table Name
+    let tableName = "";
+    let div = "";
+    if (aDiv[showdownName]) {
+        div = "a";
+        tableName = aDiv[showdownName];
+    }
+    else if (bDiv[showdownName]) {
+        div = "b";
+        tableName = bDiv[showdownName];
+    }
+    else if (cDiv[showdownName]) {
+        div = "c";
+        tableName = cDiv[showdownName];
+    }
+    else if (dDiv[showdownName]) {
+        div = "d";
+        tableName = dDiv[showdownName];
+    }
+    else
+        tableName = "Invalid Showdown Name";
+
+    //Getting spreadsheetID    
+    switch (div) {
+        case "a":
+            spreadsheetID = "12BIrC-qu-TdN7UkT39FqLbGEB9nJ1ViozaoLRCf3hjY";
+        case "b":
+            spreadsheetID = "1n5mHaL-T3tKTCtuqlldocOlacxun1yjsnw2gvNeO0l4";
+        case "c":
+            spreadsheetID = "1Mmg9b9bwvjS-73QUsBba11V6Whomv9CYcV5lE3kRSPU";
+        case "d":
+            spreadsheetID = "1Mmg9b9bwvjS-73QUsBba11V6Whomv9CYcV5lE3kRSPU";
+        default:
+            spreadsheetID = "Invalid Showdown Name";
+    }
+    
+    return [spreadsheetID, tableName];
 }
 
 async function getPokemonInfo(spreadsheetId, tableName) {
     let request = {
         "auth": client,
         "spreadsheetId": spreadsheetId,
-        "range": `${tableName}!C9:I19`
+        "range": `${tableName}!H14:O24`
     }
 
     let pokemonJson = await new Promise((resolve, reject) => {
