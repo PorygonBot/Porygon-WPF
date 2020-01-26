@@ -179,24 +179,24 @@ websocket.on("message", async function incoming(data) {
             //creating requests to update spreadsheet with new info
             let winRequest = {
                 "spreadsheetId": winSpreadsheetId,
-                "range": `${winTableName}!H14:O24`,
+                "range": `${winTableName}!I14:O24`,
                 "includeValuesInResponse": false,
                 "responseValueRenderOption": "FORMATTED_VALUE",
                 "valueInputOption": "USER_ENTERED",
                 "resource": {
-                    "range": `${winTableName}!H14:O24`,
+                    "range": `${winTableName}!I14:O24`,
                     "values": winPokeInfo.data.values
                 },
                 "auth": client
             };
             let loseRequest = {
                 "spreadsheetId": loseSpreadsheetId,
-                "range": `${loseTableName}!H14:O24`,
+                "range": `${loseTableName}!I14:O24`,
                 "includeValuesInResponse": false,
                 "responseValueRenderOption": "FORMATTED_VALUE",
                 "valueInputOption": "USER_ENTERED",
                 "resource": {
-                    "range": `${loseTableName}!H14:O24`,
+                    "range": `${loseTableName}!I14:O24`,
                     "values": losePokeInfo.data.values
                 },
                 "auth": client
@@ -208,22 +208,22 @@ websocket.on("message", async function incoming(data) {
                 let losePoke = losePokeInfo.data.values[i][1];
                 //updating Games Played and Games Won
                 if (winPoke in killJson || winPoke in deathJson) {
-                    winRequest.resource.values[i][3] = (parseInt(winRequest.resource.values[i][3]) + 1).toString();
+                    winRequest.resource.values[i][2] = (parseInt(winRequest.resource.values[i][2]) + 1).toString();
                 }
                 if (losePoke in killJson || losePoke in deathJson) {
-                    loseRequest.resource.values[i][3] = (parseInt(loseRequest.resource.values[i][3]) + 1).toString();
+                    loseRequest.resource.values[i][2] = (parseInt(loseRequest.resource.values[i][2]) + 1).toString();
                 }
 
                 //updating winner pokemon info
                 if (killJson[winPoke] >= 0)
-                    winRequest.resource.values[i][4] = (killJson[winPoke] + parseInt(winRequest.resource.values[i][4])).toString();
+                    winRequest.resource.values[i][3] = (killJson[winPoke] + parseInt(winRequest.resource.values[i][3])).toString();
                 if (deathJson[winPoke] >= 0)
-                    winRequest.resource.values[i][5] = (deathJson[winPoke] + parseInt(winRequest.resource.values[i][5])).toString();
+                    winRequest.resource.values[i][4] = (deathJson[winPoke] + parseInt(winRequest.resource.values[i][4])).toString();
                 //updating loser pokemon info
                 if (killJson[losePoke] >= 0)
-                    loseRequest.resource.values[i][4] = (killJson[losePoke] + parseInt(loseRequest.resource.values[i][4])).toString();
+                    loseRequest.resource.values[i][3] = (killJson[losePoke] + parseInt(loseRequest.resource.values[i][3])).toString();
                 if (deathJson[losePoke] >= 0)
-                    loseRequest.resource.values[i][5] = (deathJson[losePoke] + parseInt(loseRequest.resource.values[i][5])).toString();
+                    loseRequest.resource.values[i][4] = (deathJson[losePoke] + parseInt(loseRequest.resource.values[i][4])).toString();
             }
 
             console.log("killjson: ", killJson);
@@ -265,10 +265,10 @@ bot.on("message", async message => {
 
     if (channel.type === "dm") return;
     else if (
-        channel.id === "658057669617254411" ||
-        channel.id === "658058064154329089" ||
-        channel.id === "657647109926813708" ||
-        channel.id === "603067258163560459"
+        channel.id === "670749899104452608" || //Div A
+        channel.id === "670749918851366942" || //Div B
+        channel.id === "670749945757827125" || //Div C
+        channel.id === "670749964451840070"    //Div D
     ) {
         //separates given message into its parts
         let urls = Array.from(getUrls(msgStr)); //This is because getUrls returns a Set
@@ -442,7 +442,7 @@ async function getPokemonInfo(spreadsheetId, tableName) {
     let request = {
         "auth": client,
         "spreadsheetId": spreadsheetId,
-        "range": `${tableName}!H14:O24`
+        "range": `${tableName}!I14:O24`
     }
 
     let pokemonJson = await new Promise((resolve, reject) => {
