@@ -143,7 +143,20 @@ websocket.on("message", async function incoming(data) {
                 victim = p2a;
             }
 
-            console.log(`${killer} killed ${victim}`);
+            //makes sure megas count for the same number of kills/deaths
+            if (killer.endsWith(`-Mega`)) {
+                if (!killJson[killer]) {
+                    killJson[killer] = killJson[killer.split("-")[0]];
+                    delete killJson[killer.split("-")[0]];
+                }
+            }
+            if (victim.endsWith(`-Mega`)){
+                if (!killJson[killer]) {
+                    killJson[killer] = killJson[killer.split("-")[0]];
+                    delete killJson[killer.split("-")[0]];
+                }
+            }
+
             //updating killer info in the JSON
             if (!killJson[killer])
                 killJson[killer] = 1;
@@ -268,7 +281,8 @@ bot.on("message", async message => {
         channel.id === "670749899104452608" || //Div A
         channel.id === "670749918851366942" || //Div B
         channel.id === "670749945757827125" || //Div C
-        channel.id === "670749964451840070"    //Div D
+        channel.id === "670749964451840070" || //Div D
+        channel.id === "670749997293240334" //Off-Season
     ) {
         //separates given message into its parts
         let urls = Array.from(getUrls(msgStr)); //This is because getUrls returns a Set
@@ -398,11 +412,36 @@ async function getTableId(showdownName) {
         "Hooyah Tark": "BSB",
         "Twigz11": "WCW"
     }
+    let oDiv = { //https://i.gyazo.com/9b8e28a9a88f4d2d68b47c8a340422d9.png
+        "PotatoZ4": "RWW",
+        "Tomathor": "SSP",
+        "ManciniTheAmazing": "ITL",
+        "PikachuZappyZap": "SSH",
+        "stumbles23": "CLV",
+        "dont click forfeit": "NNK",
+        "Etesian": "LCL",
+        "gravelmouse": "8",
+        "Mangle faz": "GGR",
+        "CheezitzZ": "MGM",
+        "blobblob88": "11",
+        "Autumn Leavess": "NHR",
+        "Techno6377": "TXM",
+        "Bakery300": "14",
+        "KaiWhai": "LVL",
+        "Xgamerpokestar": "NDS",
+        "MuffinKnightTMA": "17",
+        "James(and Eevee)": "18"
+    }
 
     //Getting player's Division & Table Name
     let tableName = "";
     let div = "";
-    if (aDiv[showdownName]) {
+    if (oDiv[showdownName]) {
+        div = "o";
+        tableName = oDiv[showdownName];
+    }
+    /*
+    else if (aDiv[showdownName]) {
         div = "a";
         tableName = aDiv[showdownName];
     }
@@ -418,6 +457,7 @@ async function getTableId(showdownName) {
         div = "d";
         tableName = dDiv[showdownName];
     }
+    */ //The bot is only used for Off-Season for now
     else
         tableName = "Invalid Showdown Name";
 
@@ -431,6 +471,8 @@ async function getTableId(showdownName) {
             spreadsheetID = "1Mmg9b9bwvjS-73QUsBba11V6Whomv9CYcV5lE3kRSPU";
         case "d":
             spreadsheetID = "1Mmg9b9bwvjS-73QUsBba11V6Whomv9CYcV5lE3kRSPU";
+        case "o":
+            spreadsheetID = "1nLuXg7349_YfJqs0mdkbdAx0RRKa6JuY6O8Tg2ha_20";
         default:
             spreadsheetID = "Invalid Showdown Name";
     }
