@@ -12,7 +12,7 @@ const { google } = require("googleapis");
 //Constants required to make the program work as intended
 const plus = google.plus("v1");
 process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
-const { psUsername, psPassword, botToken, api_key } = require("./config.json");
+const { psUsername, psPassword, botToken, api_key, refreshToken } = require("./config.json");
 
 const keyfile = path.join(__dirname, "client_secret.json");
 const keys = JSON.parse(fs.readFileSync(keyfile));
@@ -38,12 +38,15 @@ let authorizeUrl = client.generateAuthUrl({
 // Open an http server to accept the oauth callback. In this
 // simple example, the only request to our webserver is to
 // /oauth2callback?code=<code>
+// Open an http server to accept the oauth callback. In this
+// // simple example, the only request to our webserver is to
+///oauth2callback?code=<code>
 const app = express();
 app.get("/oauth2", (req, res) => {
     const code = req.query.code;
     client.getToken(code, (err, tokens) => {
         if (err) {
-            console.error("Error getting oAuth tokens:");
+	    console.error("Error getting oAuth tokens:");
             throw err;
         }
         client.setCredentials(tokens);
@@ -51,9 +54,17 @@ app.get("/oauth2", (req, res) => {
         server.close();
     });
 });
-client.setCredentials()
+client.setCredentials({ refresh_token: refreshToken });
 
-const server = app.listen(3000, () => {
+client.on('tokens', (tokens) => {
+    if (tokens.refresh_token) {
+	// store the refresh_token in my database!
+        console.log(tokens.refresh_token);
+    }
+    console.log(tokens.access_token);
+});
+
+const server = app.listen(4000, () => {
     // open the browser to the authorize url to start the workflow
     console.log(authorizeUrl);
     opn(authorizeUrl, { wait: false });
@@ -97,7 +108,7 @@ websocket.on("message", async function incoming(data) {
         let nonce = data.substring(10);
         let assertion = await login(nonce);
         //logs in
-        websocket.send(`|/trn iGLBot,128,${assertion}|`);
+        websocket.send(`|/trn ${psUsername},0,${assertion}|`);
     }
 
     //removing the `-supereffective` line if it exists in realdata
@@ -143,20 +154,6 @@ websocket.on("message", async function incoming(data) {
                 victim = p2a;
             }
 
-            //makes sure megas count for the same number of kills/deaths
-            if (killer.endsWith(`-Mega`)) {
-                if (!killJson[killer]) {
-                    killJson[killer] = killJson[killer.split("-")[0]];
-                    delete killJson[killer.split("-")[0]];
-                }
-            }
-            if (victim.endsWith(`-Mega`)){
-                if (!killJson[killer]) {
-                    killJson[killer] = killJson[killer.split("-")[0]];
-                    delete killJson[killer.split("-")[0]];
-                }
-            }
-
             //updating killer info in the JSON
             if (!killJson[killer])
                 killJson[killer] = 1;
@@ -167,6 +164,8 @@ websocket.on("message", async function incoming(data) {
                 deathJson[victim] = 1;
             else
                 deathJson[victim]++;
+	
+	    console.log(`${killer} killed ${victim}.`);
         }
 
         //|win|infernapeisawesome
@@ -182,43 +181,54 @@ websocket.on("message", async function incoming(data) {
             let wintablenameArr = await getTableId(winner);
             let winSpreadsheetId = wintablenameArr[0];
             let winTableName = wintablenameArr[1];
+	    console.log(wintablenameArr);
             let winPokeInfo = await getPokemonInfo(winSpreadsheetId, winTableName);
 
             let losetablenameArr = await getTableId(loser);
             let loseSpreadsheetId = losetablenameArr[0];
             let loseTableName = losetablenameArr[1];
+	    console.log(losetablenameArr);
             let losePokeInfo = await getPokemonInfo(loseSpreadsheetId, loseTableName);
 
             //creating requests to update spreadsheet with new info
             let winRequest = {
                 "spreadsheetId": winSpreadsheetId,
-                "range": `${winTableName}!I14:O24`,
+                "range": `${winTableName}!C9:H19`,
                 "includeValuesInResponse": false,
                 "responseValueRenderOption": "FORMATTED_VALUE",
                 "valueInputOption": "USER_ENTERED",
                 "resource": {
-                    "range": `${winTableName}!I14:O24`,
+                    "range": `${winTableName}!C9:H19`,
                     "values": winPokeInfo.data.values
                 },
                 "auth": client
             };
             let loseRequest = {
                 "spreadsheetId": loseSpreadsheetId,
-                "range": `${loseTableName}!I14:O24`,
+                "range": `${loseTableName}!C9:H19`,
                 "includeValuesInResponse": false,
                 "responseValueRenderOption": "FORMATTED_VALUE",
                 "valueInputOption": "USER_ENTERED",
                 "resource": {
-                    "range": `${loseTableName}!I14:O24`,
+                    "range": `${loseTableName}!C9:H19`,
                     "values": losePokeInfo.data.values
                 },
                 "auth": client
             };
             console.log("winrequest before: ", winRequest.resource.values);
             console.log("loserequest before: ", loseRequest.resource.values);
-            for (var i = 0; i < 10; i++) {
-                let winPoke = winPokeInfo.data.values[i][1];
-                let losePoke = losePokeInfo.data.values[i][1];
+            for (var i = 0; i < 11; i++) {
+                let winPoke = winPokeInfo.data.values[i][0];
+                let losePoke = losePokeInfo.data.values[i][0];
+
+		//fixing mega thing
+		if (winPoke.endsWith("-Mega")) {
+		    winPoke = winPoke.split("-")[0];
+		}
+		if (losePoke.endsWith("-Mega")) {
+		    losePoke = losePoke.split("-")[0];
+		}
+
                 //updating Games Played and Games Won
                 if (winPoke in killJson || winPoke in deathJson) {
                     winRequest.resource.values[i][2] = (parseInt(winRequest.resource.values[i][2]) + 1).toString();
@@ -229,14 +239,14 @@ websocket.on("message", async function incoming(data) {
 
                 //updating winner pokemon info
                 if (killJson[winPoke] >= 0)
-                    winRequest.resource.values[i][3] = (killJson[winPoke] + parseInt(winRequest.resource.values[i][3])).toString();
+                    winRequest.resource.values[i][4] = (killJson[winPoke] + parseInt(winRequest.resource.values[i][4])).toString();
                 if (deathJson[winPoke] >= 0)
-                    winRequest.resource.values[i][4] = (deathJson[winPoke] + parseInt(winRequest.resource.values[i][4])).toString();
+                    winRequest.resource.values[i][5] = (deathJson[winPoke] + parseInt(winRequest.resource.values[i][5])).toString();
                 //updating loser pokemon info
                 if (killJson[losePoke] >= 0)
-                    loseRequest.resource.values[i][3] = (killJson[losePoke] + parseInt(loseRequest.resource.values[i][3])).toString();
+                    loseRequest.resource.values[i][4] = (killJson[losePoke] + parseInt(loseRequest.resource.values[i][4])).toString();
                 if (deathJson[losePoke] >= 0)
-                    loseRequest.resource.values[i][4] = (deathJson[losePoke] + parseInt(loseRequest.resource.values[i][4])).toString();
+                    loseRequest.resource.values[i][5] = (deathJson[losePoke] + parseInt(loseRequest.resource.values[i][5])).toString();
             }
 
             console.log("killjson: ", killJson);
@@ -278,11 +288,11 @@ bot.on("message", async message => {
 
     if (channel.type === "dm") return;
     else if (
-        channel.id === "670749899104452608" || //Div A
+        /*channel.id === "670749899104452608" || //Div A
         channel.id === "670749918851366942" || //Div B
         channel.id === "670749945757827125" || //Div C
         channel.id === "670749964451840070" || //Div D
-        channel.id === "670749997293240334" //Off-Season
+        */channel.id === "670749997293240334" //Off-Season
     ) {
         //separates given message into its parts
         let urls = Array.from(getUrls(msgStr)); //This is because getUrls returns a Set
@@ -415,27 +425,27 @@ async function getTableId(showdownName) {
     let oDiv = { //https://i.gyazo.com/9b8e28a9a88f4d2d68b47c8a340422d9.png
         "PotatoZ4": "RWW",
         "Tomathor": "SSP",
-        "ManciniTheAmazing": "ITL",
+        "Majoras_Mask4343": "LVN",
         "PikachuZappyZap": "SSH",
         "stumbles23": "CLV",
         "dont click forfeit": "NNK",
         "Etesian": "LCL",
-        "gravelmouse": "8",
+        "Gravelmouse": "SSS",
         "Mangle faz": "GGR",
         "CheezitzZ": "MGM",
-        "blobblob88": "11",
-        "Autumn Leavess": "NHR",
+        "blobblob88": "KSC",
+        "Autumn Leavess": "MHR",
         "Techno6377": "TXM",
-        "Bakery300": "14",
+        "tiep123": "OAK",
         "KaiWhai": "LVL",
         "Xgamerpokestar": "NDS",
-        "MuffinKnightTMA": "17",
-        "James(and Eevee)": "18"
+        "MuffinknightTMA": "PBP",
+        "James(and Eevee)": "FFG"
     }
 
     //Getting player's Division & Table Name
     let tableName = "";
-    let div = "";
+    let div = "o";
     if (oDiv[showdownName]) {
         div = "o";
         tableName = oDiv[showdownName];
@@ -458,8 +468,8 @@ async function getTableId(showdownName) {
         tableName = dDiv[showdownName];
     }
     */ //The bot is only used for Off-Season for now
-    else
-        tableName = "Invalid Showdown Name";
+    //else
+      //  tableName = "Invalid Showdown Name";
 
     //Getting spreadsheetID    
     switch (div) {
@@ -472,9 +482,7 @@ async function getTableId(showdownName) {
         case "d":
             spreadsheetID = "1Mmg9b9bwvjS-73QUsBba11V6Whomv9CYcV5lE3kRSPU";
         case "o":
-            spreadsheetID = "1nLuXg7349_YfJqs0mdkbdAx0RRKa6JuY6O8Tg2ha_20";
-        default:
-            spreadsheetID = "Invalid Showdown Name";
+            spreadsheetID = "1zDTNDkXcrm9vYLpa2-IAVG2fRRDHJ3cYCpmS_53Ksfg";
     }
     
     return [spreadsheetID, tableName];
@@ -484,7 +492,7 @@ async function getPokemonInfo(spreadsheetId, tableName) {
     let request = {
         "auth": client,
         "spreadsheetId": spreadsheetId,
-        "range": `${tableName}!I14:O24`
+        "range": `${tableName}!C9:H19`
     }
 
     let pokemonJson = await new Promise((resolve, reject) => {
