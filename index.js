@@ -97,8 +97,10 @@ let pokes1 = [];
 let pokes2 = [];
 let killer = "";
 let victim = "";
-let killJson = {};
-let deathJson = {};
+let killJsonp1 = {};
+let killJsonp2 = {};
+let deathJsonp1 = {};
+let deathJsonp2 = {};
 //when the websocket sends a message
 websocket.on("message", async function incoming(data) {
     let realdata = data.split("\n");
@@ -139,31 +141,47 @@ websocket.on("message", async function incoming(data) {
 
         //|poke|p1|Hatterene, F|
         else if (linenew.startsWith(`poke`)) {
-            let pokemon = parts[2].split(",")[0];
-            if (parts[1] === "p1") pokes1.push(pokemon);
-            else if (parts[1] === "p2") pokes2.push(pokemon);
-
-            killJson[pokemon] = 0;
-            deathJson[pokemon] = 0;
-        } else if (linenew.startsWith("faint")) {
+            let pokemon = parts[2].split(",")[0].split("-")[0];
+            if (parts[1] === "p1") {
+                pokes1.push(pokemon);
+                killJsonp1[pokemon] = 0;
+                deathJsonp1[pokemon] = 0;
+            }
+            else if (parts[1] === "p2") {
+                pokes2.push(pokemon);
+                killJsonp2[pokemon] = 0;
+                deathJsonp2[pokemon] = 0;
+            }
+        } 
+        else if (linenew.startsWith("faint")) {
             if (parts[1].substring(0, 3) === "p1a") {
                 killer = p2a;
                 victim = p1a;
-            } else {
+                //updating killer info in the JSON
+                if (!killJsonp2[killer])
+                    killJsonp2[killer] = 1;
+                else
+                    killJsonp2[killer]++;
+                //updating victim info in the JSON
+                if (!deathJsonp1[victim])
+                    deathJsonp1[victim] = 1;
+                else 
+                    deathJsonp1[victim]++;
+            } 
+            else {
                 killer = p1a;
                 victim = p2a;
+                //updating killer info in the JSON
+                if (!killJsonp1[killer])
+                    killJsonp1[killer] = 1;
+                else
+                    killJsonp1[killer]++;
+                //updating victim info in the JSON
+                if (!deathJsonp2[victim])
+                    deathJsonp2[victim] = 1;
+                else 
+                    deathJsonp2[victim]++;
             }
-
-            //updating killer info in the JSON
-            if (!killJson[killer])
-                killJson[killer] = 1;
-            else
-                killJson[killer]++;
-            //updating victim info in the JSON
-            if (!deathJson[victim])
-                deathJson[victim] = 1;
-            else
-                deathJson[victim]++;
 	
 	    console.log(`${killer} killed ${victim}.`);
         }
@@ -171,23 +189,27 @@ websocket.on("message", async function incoming(data) {
         //|win|infernapeisawesome
         else if (linenew.startsWith(`win`)) {
             let winner = parts[1];
+            winner = ((winner === players[players.length - 2]) ? `${winner}p1` : `${winner}p2`);
             console.log(`${winner} won!`);
             console.log("Battle link: ", battlelink);
             websocket.send(`${battlelink}|/savereplay`); //TODO finish this replay thing
-            let loser = ((winner === players[players.length - 2]) ? players[players.length - 1] : players[players.length - 2]);
+            let loser = ((winner === players[players.length - 2]) ? `${players[players.length - 1]}p2` : `${players[players.length - 2]}p1`);
             console.log(`${loser} lost!`);
 
+            console.log("Player 1 killjson: ", killJsonp1);
+            console.log("Player 2 killjson: ", killJsonp2);
+            console.log("Player 1 deathjson: ", deathJsonp1);
+            console.log("Player 2 deathjson: ", deathJsonp2);
+
             //updating the google sheet accordingly
-            let wintablenameArr = await getTableId(winner);
+            let wintablenameArr = await getTableId(winner.substring(0, winner.length-2));
             let winSpreadsheetId = wintablenameArr[0];
             let winTableName = wintablenameArr[1];
-	    console.log(wintablenameArr);
             let winPokeInfo = await getPokemonInfo(winSpreadsheetId, winTableName);
 
-            let losetablenameArr = await getTableId(loser);
+            let losetablenameArr = await getTableId(loser.substring(0, loser.length-2));
             let loseSpreadsheetId = losetablenameArr[0];
             let loseTableName = losetablenameArr[1];
-	    console.log(losetablenameArr);
             let losePokeInfo = await getPokemonInfo(loseSpreadsheetId, loseTableName);
 
             //creating requests to update spreadsheet with new info
@@ -217,40 +239,58 @@ websocket.on("message", async function incoming(data) {
             };
             console.log("winrequest before: ", winRequest.resource.values);
             console.log("loserequest before: ", loseRequest.resource.values);
-            for (var i = 0; i < 11; i++) {
-                let winPoke = winPokeInfo.data.values[i][0];
-                let losePoke = losePokeInfo.data.values[i][0];
+            for (var i = 0; i < 10; i++) {
+                let winPoke = winPokeInfo.data.values[i][0].split("-")[0];
+                let losePoke = losePokeInfo.data.values[i][0].split("-")[0];
+                //checking if winner & loser is player 1 or player 2
+                let winnerplayer = 0;
+                if (winner.endsWith("p1")) 
+                    winnerplayer = 1;
+                else
+                    winnerplayer = 2;
 
-		//fixing mega thing
-		if (winPoke.endsWith("-Mega")) {
-		    winPoke = winPoke.split("-")[0];
-		}
-		if (losePoke.endsWith("-Mega")) {
-		    losePoke = losePoke.split("-")[0];
-		}
+                if (winnerplayer == 1) {
+                    //updating Games Played and Games Won
+                    if (winPoke in killJsonp1 || winPoke in deathJsonp1) {
+                        winRequest.resource.values[i][2] = (parseInt(winRequest.resource.values[i][3]) + 1).toString();
+                    }
+                    if (losePoke in killJsonp2 || losePoke in deathJsonp2) {
+                        loseRequest.resource.values[i][2] = (parseInt(loseRequest.resource.values[i][3]) + 1).toString();
+                    }
 
-                //updating Games Played and Games Won
-                if (winPoke in killJson || winPoke in deathJson) {
-                    winRequest.resource.values[i][2] = (parseInt(winRequest.resource.values[i][2]) + 1).toString();
+                    //updating winner pokemon info
+                    if (killJsonp1[winPoke] >= 0)
+                        winRequest.resource.values[i][4] = (killJsonp1[winPoke] + parseInt(winRequest.resource.values[i][5])).toString();
+                    if (deathJsonp1[winPoke] >= 0)
+                        winRequest.resource.values[i][5] = (deathJsonp1[winPoke] + parseInt(winRequest.resource.values[i][6])).toString();
+                    //updating loser pokemon info
+                    if (killJsonp2[losePoke] >= 0)
+                        loseRequest.resource.values[i][4] = (killJsonp2[losePoke] + parseInt(loseRequest.resource.values[i][5])).toString();
+                    if (deathJsonp2[losePoke] >= 0)
+                        loseRequest.resource.values[i][5] = (deathJsonp2[losePoke] + parseInt(loseRequest.resource.values[i][6])).toString();
                 }
-                if (losePoke in killJson || losePoke in deathJson) {
-                    loseRequest.resource.values[i][2] = (parseInt(loseRequest.resource.values[i][2]) + 1).toString();
-                }
+                else {
+                    //updating Games Played and Games Won
+                    if (winPoke in killJsonp2 || winPoke in deathJsonp2) {
+                        winRequest.resource.values[i][2] = (parseInt(winRequest.resource.values[i][3]) + 1).toString();
+                    }
+                    if (losePoke in killJsonp1 || losePoke in deathJsonp1) {
+                        loseRequest.resource.values[i][2] = (parseInt(loseRequest.resource.values[i][3]) + 1).toString();
+                    }
 
-                //updating winner pokemon info
-                if (killJson[winPoke] >= 0)
-                    winRequest.resource.values[i][4] = (killJson[winPoke] + parseInt(winRequest.resource.values[i][4])).toString();
-                if (deathJson[winPoke] >= 0)
-                    winRequest.resource.values[i][5] = (deathJson[winPoke] + parseInt(winRequest.resource.values[i][5])).toString();
-                //updating loser pokemon info
-                if (killJson[losePoke] >= 0)
-                    loseRequest.resource.values[i][4] = (killJson[losePoke] + parseInt(loseRequest.resource.values[i][4])).toString();
-                if (deathJson[losePoke] >= 0)
-                    loseRequest.resource.values[i][5] = (deathJson[losePoke] + parseInt(loseRequest.resource.values[i][5])).toString();
+                    //updating winner pokemon info
+                    if (killJsonp2[winPoke] >= 0)
+                        winRequest.resource.values[i][4] = (killJsonp2[winPoke] + parseInt(winRequest.resource.values[i][5])).toString();
+                    if (deathJsonp2[winPoke] >= 0)
+                        winRequest.resource.values[i][5] = (deathJsonp2[winPoke] + parseInt(winRequest.resource.values[i][6])).toString();
+                    //updating loser pokemon info
+                    if (killJsonp1[losePoke] >= 0)
+                        loseRequest.resource.values[i][4] = (killJsonp1[losePoke] + parseInt(loseRequest.resource.values[i][5])).toString();
+                    if (deathJsonp1[losePoke] >= 0)
+                        loseRequest.resource.values[i][5] = (deathJsonp1[losePoke] + parseInt(loseRequest.resource.values[i][6])).toString();
+                }
             }
 
-            console.log("killjson: ", killJson);
-            console.log("deathjson: ", deathJson);
             console.log("winrequest after: ", winRequest.resource.values);
             console.log("loserequest after: ", loseRequest.resource.values);
             //updating pokemon info
@@ -271,8 +311,10 @@ websocket.on("message", async function incoming(data) {
             pokes2 = [];
             killer = "";
             victim = "";
-            killJson = {};
-            deathJson = {};
+            killJsonp1 = {};
+            killJsonp2 = {};
+            deathJsonp1 = {};
+            deathJsonp2 = {};
         }
     }
 });
@@ -422,7 +464,7 @@ async function getTableId(showdownName) {
         "Hooyah Tark": "BSB",
         "Twigz11": "WCW"
     }
-    let oDiv = { //https://i.gyazo.com/9b8e28a9a88f4d2d68b47c8a340422d9.png
+    let oDiv = {
         "PotatoZ4": "RWW",
         "Tomathor": "SSP",
         "Majoras_Mask4343": "LVN",
