@@ -193,7 +193,7 @@ websocket.on("message", async function incoming(data) {
             console.log(`${winner} won!`);
             console.log("Battle link: ", battlelink);
             websocket.send(`${battlelink}|/savereplay`); //TODO finish this replay thing
-            let loser = ((winner === players[players.length - 2]) ? `${players[players.length - 1]}p2` : `${players[players.length - 2]}p1`);
+            let loser = ((winner === `${players[players.length - 2]}p1`) ? `${players[players.length - 1]}p2` : `${players[players.length - 2]}p1`);
             console.log(`${loser} lost!`);
 
             console.log("Player 1 killjson: ", killJsonp1);
@@ -252,42 +252,42 @@ websocket.on("message", async function incoming(data) {
                 if (winnerplayer == 1) {
                     //updating Games Played and Games Won
                     if (winPoke in killJsonp1 || winPoke in deathJsonp1) {
-                        winRequest.resource.values[i][2] = (parseInt(winRequest.resource.values[i][3]) + 1).toString();
+                        winRequest.resource.values[i][2] = (parseInt(winRequest.resource.values[i][2]) + 1).toString();
                     }
                     if (losePoke in killJsonp2 || losePoke in deathJsonp2) {
-                        loseRequest.resource.values[i][2] = (parseInt(loseRequest.resource.values[i][3]) + 1).toString();
+                        loseRequest.resource.values[i][2] = (parseInt(loseRequest.resource.values[i][2]) + 1).toString();
                     }
 
                     //updating winner pokemon info
                     if (killJsonp1[winPoke] >= 0)
-                        winRequest.resource.values[i][4] = (killJsonp1[winPoke] + parseInt(winRequest.resource.values[i][5])).toString();
+                        winRequest.resource.values[i][4] = (killJsonp1[winPoke] + parseInt(winRequest.resource.values[i][4])).toString();
                     if (deathJsonp1[winPoke] >= 0)
-                        winRequest.resource.values[i][5] = (deathJsonp1[winPoke] + parseInt(winRequest.resource.values[i][6])).toString();
+                        winRequest.resource.values[i][5] = (deathJsonp1[winPoke] + parseInt(winRequest.resource.values[i][5])).toString();
                     //updating loser pokemon info
                     if (killJsonp2[losePoke] >= 0)
-                        loseRequest.resource.values[i][4] = (killJsonp2[losePoke] + parseInt(loseRequest.resource.values[i][5])).toString();
+                        loseRequest.resource.values[i][4] = (killJsonp2[losePoke] + parseInt(loseRequest.resource.values[i][4])).toString();
                     if (deathJsonp2[losePoke] >= 0)
-                        loseRequest.resource.values[i][5] = (deathJsonp2[losePoke] + parseInt(loseRequest.resource.values[i][6])).toString();
+                        loseRequest.resource.values[i][5] = (deathJsonp2[losePoke] + parseInt(loseRequest.resource.values[i][5])).toString();
                 }
                 else {
                     //updating Games Played and Games Won
                     if (winPoke in killJsonp2 || winPoke in deathJsonp2) {
-                        winRequest.resource.values[i][2] = (parseInt(winRequest.resource.values[i][3]) + 1).toString();
+                        winRequest.resource.values[i][2] = (parseInt(winRequest.resource.values[i][2]) + 1).toString();
                     }
                     if (losePoke in killJsonp1 || losePoke in deathJsonp1) {
-                        loseRequest.resource.values[i][2] = (parseInt(loseRequest.resource.values[i][3]) + 1).toString();
+                        loseRequest.resource.values[i][2] = (parseInt(loseRequest.resource.values[i][2]) + 1).toString();
                     }
 
                     //updating winner pokemon info
                     if (killJsonp2[winPoke] >= 0)
-                        winRequest.resource.values[i][4] = (killJsonp2[winPoke] + parseInt(winRequest.resource.values[i][5])).toString();
+                        winRequest.resource.values[i][4] = (killJsonp2[winPoke] + parseInt(winRequest.resource.values[i][4])).toString();
                     if (deathJsonp2[winPoke] >= 0)
-                        winRequest.resource.values[i][5] = (deathJsonp2[winPoke] + parseInt(winRequest.resource.values[i][6])).toString();
+                        winRequest.resource.values[i][5] = (deathJsonp2[winPoke] + parseInt(winRequest.resource.values[i][5])).toString();
                     //updating loser pokemon info
                     if (killJsonp1[losePoke] >= 0)
-                        loseRequest.resource.values[i][4] = (killJsonp1[losePoke] + parseInt(loseRequest.resource.values[i][5])).toString();
+                        loseRequest.resource.values[i][4] = (killJsonp1[losePoke] + parseInt(loseRequest.resource.values[i][4])).toString();
                     if (deathJsonp1[losePoke] >= 0)
-                        loseRequest.resource.values[i][5] = (deathJsonp1[losePoke] + parseInt(loseRequest.resource.values[i][6])).toString();
+                        loseRequest.resource.values[i][5] = (deathJsonp1[losePoke] + parseInt(loseRequest.resource.values[i][5])).toString();
                 }
             }
 
@@ -465,19 +465,19 @@ async function getTableId(showdownName) {
         "Twigz11": "WCW"
     }
     let oDiv = {
-        "PotatoZ4": "RWW",
+        "ShrekForSmash": "BUF",
         "Tomathor": "SSP",
         "Majoras_Mask4343": "LVN",
         "PikachuZappyZap": "SSH",
         "stumbles23": "CLV",
-        "dont click forfeit": "NNK",
+        "JoltsOfEnergy": "ADA",
         "Etesian": "LCL",
-        "Gravelmouse": "SSS",
+        "yoPierre14": "PIT",
         "Mangle faz": "GGR",
         "CheezitzZ": "MGM",
         "blobblob88": "KSC",
         "Autumn Leavess": "MHR",
-        "Techno6377": "TXM",
+        "ominousdraco": "CCD",
         "tiep123": "OAK",
         "KaiWhai": "LVL",
         "Xgamerpokestar": "NDS",
