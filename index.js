@@ -334,7 +334,10 @@ bot.on("message", async message => {
         channel.id === "670749918851366942" || //Div B
         channel.id === "670749945757827125" || //Div C
         channel.id === "670749964451840070" || //Div D
-        */channel.id === "670749997293240334" //Off-Season
+        */channel.id === "670749997293240334" || //Off-Season
+        //channel.id === "570025565504143363" || //ICL Majors
+        //channel.id === "570044447279153162" || //ICL Minors
+        channel.id === "682403296484392974" //ICL Off-Season
     ) {
         //separates given message into its parts
         let urls = Array.from(getUrls(msgStr)); //This is because getUrls returns a Set
@@ -366,6 +369,24 @@ bot.on("message", async message => {
 
         return channel.send(helpEmbed);
     }
+    else if (msgStr.toLowerCase() === `${prefix} ping`) {
+        let m = await channel.send(`Pong!`);
+        m.edit(`Pong! Latency: ${m.createdTimestamp - message.createdTimestamp}ms, API latency: ${bot.ping}ms`)
+    }
+    else if (msgStr.toLowerCase() === `${prefix} tri-attack`) {
+        let rand = Math.round(Math.random() * 5);
+        let m = await channel.send("Porygon used Tri-Attack!");
+        switch (rand) {
+            case 1:
+                return m.edit("Porygon used Tri-Attack! It burned the target!");
+            case 2:
+                return m.edit("Porygon used Tri-Attack! It froze the target!");
+            case 3:
+                return m.edit("Porygon used Tri-Attack! It paralyzed the target!");
+            default:
+                return m.edit("Porygon used Tri-Attack! No secondary effect on the target.");
+        }
+    }
 });
 //making the bot login
 bot.login(botToken);
@@ -390,6 +411,7 @@ const sheets = google.sheets({
     version: 'v4',
     auth: api_key
 });
+
 async function getTableId(showdownName) {
     //"showdownName":"SHEETNAME"
     let aDiv = {
@@ -484,13 +506,37 @@ async function getTableId(showdownName) {
         "MuffinknightTMA": "PBP",
         "James(and Eevee)": "FFG"
     }
+    let iclOdiv = {
+        "Ash10095": "CLS",
+        "yoPierre14": "PPS",
+        "patbingsoo": "SSK",
+        "Techno6377": "BBC",
+        "Thudgore": "TBB",
+        "Dylanronpa": "TBN",
+        "LycanShadoG": "SFS",
+        "jeanmachine22": "OGS",
+        "malcolm24": "MMS",
+        "hax requires skill": "PIT",
+        "PikachuZappyZap": "SSS",
+        "ManchiniTheAmazing": "ITL",
+        "The Rissoux": "OHM",
+        "Griffin07": "RCR",
+        "sacred_td": "LAD",
+        "MegaInfernape20": "TBL",
+        "The Traveling Guy": "JKS",
+        "Thracia12": "WVW"
+    }
 
     //Getting player's Division & Table Name
     let tableName = "";
-    let div = "o";
+    let div = "";
     if (oDiv[showdownName]) {
         div = "o";
         tableName = oDiv[showdownName];
+    }
+    else if (iclOdiv[showdownName]) {
+        div = "iclo";
+        tableName = iclOdiv[showdownName];
     }
     /*
     else if (aDiv[showdownName]) {
@@ -525,6 +571,8 @@ async function getTableId(showdownName) {
             spreadsheetID = "1Mmg9b9bwvjS-73QUsBba11V6Whomv9CYcV5lE3kRSPU";
         case "o":
             spreadsheetID = "1zDTNDkXcrm9vYLpa2-IAVG2fRRDHJ3cYCpmS_53Ksfg";
+        case "iclo":
+            spreadsheetID = "17q3f52xUQ9X6z8PMwZFiXitec9s5ZY97ELfrNw5mbgc";
     }
     
     return [spreadsheetID, tableName];
