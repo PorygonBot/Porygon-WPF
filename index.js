@@ -155,8 +155,8 @@ websocket.on("message", async function incoming(data) {
         } 
         else if (linenew.startsWith("faint")) {
             if (parts[1].substring(0, 3) === "p1a") {
-                killer = p2a;
-                victim = p1a;
+                killer = p2a.split("-")[0];
+                victim = p1a.split("-")[0];
                 //updating killer info in the JSON
                 if (!killJsonp2[killer])
                     killJsonp2[killer] = 1;
@@ -169,8 +169,8 @@ websocket.on("message", async function incoming(data) {
                     deathJsonp1[victim]++;
             } 
             else {
-                killer = p1a;
-                victim = p2a;
+                killer = p1a.split("-")[0];
+		victim = p2a.split("-")[0];
                 //updating killer info in the JSON
                 if (!killJsonp1[killer])
                     killJsonp1[killer] = 1;
@@ -239,7 +239,7 @@ websocket.on("message", async function incoming(data) {
             };
             console.log("winrequest before: ", winRequest.resource.values);
             console.log("loserequest before: ", loseRequest.resource.values);
-            for (var i = 0; i < 10; i++) {
+            for (var i = 0; i < winPokeInfo.data.values.length; i++) {
                 let winPoke = winPokeInfo.data.values[i][0].split("-")[0];
                 let losePoke = losePokeInfo.data.values[i][0].split("-")[0];
                 //checking if winner & loser is player 1 or player 2
@@ -502,8 +502,8 @@ async function getTableId(showdownName) {
         "ominousdraco": "CCD",
         "tiep123": "OAK",
         "KaiWhai": "LVL",
-        "Xgamerpokestar": "NDS",
-        "MuffinknightTMA": "PBP",
+        "xgamerpokestar": "NDS",
+        "MuffinKnightTMA": "PBP",
         "James(and Eevee)": "FFG"
     }
     let iclOdiv = {
@@ -513,7 +513,7 @@ async function getTableId(showdownName) {
         "Techno6377": "BBC",
         "Thudgore": "TBB",
         "Dylanronpa": "TBN",
-        "LycanShadoG": "SFS",
+        "LycanShadowG": "SFS",
         "jeanmachine22": "OGS",
         "malcolm24": "MMS",
         "hax requires skill": "PIT",
@@ -528,14 +528,14 @@ async function getTableId(showdownName) {
     }
 
     //Getting player's Division & Table Name
-    let tableName = "";
-    let div = "";
+    var tableName = "";
+    var div = "";
     if (oDiv[showdownName]) {
         div = "o";
         tableName = oDiv[showdownName];
     }
     else if (iclOdiv[showdownName]) {
-        div = "iclo";
+        div = "i";
         tableName = iclOdiv[showdownName];
     }
     /*
@@ -559,7 +559,8 @@ async function getTableId(showdownName) {
     //else
       //  tableName = "Invalid Showdown Name";
 
-    //Getting spreadsheetID    
+    //Getting spreadsheetID
+    var spreadsheetID = "";
     switch (div) {
         case "a":
             spreadsheetID = "12BIrC-qu-TdN7UkT39FqLbGEB9nJ1ViozaoLRCf3hjY";
@@ -570,11 +571,16 @@ async function getTableId(showdownName) {
         case "d":
             spreadsheetID = "1Mmg9b9bwvjS-73QUsBba11V6Whomv9CYcV5lE3kRSPU";
         case "o":
+	    console.log("HI I'M HERE OO");
             spreadsheetID = "1zDTNDkXcrm9vYLpa2-IAVG2fRRDHJ3cYCpmS_53Ksfg";
-        case "iclo":
+	    break;
+        case "i":
+	    console.log("HI I'M HERE ICLOO");
             spreadsheetID = "17q3f52xUQ9X6z8PMwZFiXitec9s5ZY97ELfrNw5mbgc";
+	    break;
     }
-    
+   
+    console.log([spreadsheetID, tableName, div]);
     return [spreadsheetID, tableName];
 }
 
