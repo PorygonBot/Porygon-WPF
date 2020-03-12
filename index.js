@@ -343,6 +343,26 @@ bot.on("message", async message => {
         let urls = Array.from(getUrls(msgStr)); //This is because getUrls returns a Set
         let battleLink = urls[0]; //http://sports.psim.us/battle-gen8legacynationaldex-17597 format
 
+        //message.guild.name
+        //storing if the match is happening in ICL or WPF
+        let serverName = message.guild.name;
+        fs.readFile("league.json", "utf8", function readFileCallback(err, data) {
+            if (err) {
+                console.log(err);
+            }
+            else {
+                let leagueJson = JSON.parse(data);
+                if (serverName === "World Pokemon Federation") {
+                    leagueJson.current = "WPF";
+                }
+                else if (serverName === "International Coaches League") {
+                    leagueJson.current = "ICL";
+                }
+                json = JSON.stringify(leagueJson);
+                fs.writeFile("league.json", json, "utf8");
+            }
+        })
+
         //joins the battle linked
         if (battleLink) {
             channel.send(`Joining the battle...`);
@@ -487,33 +507,33 @@ async function getTableId(showdownName) {
         "Twigz11": "WCW"
     }
     let oDiv = {
-        "ShrekForSmash": "BUF",
-        "Tomathor": "SSP",
-        "Majoras_Mask4343": "LVN",
-        "PikachuZappyZap": "SSH",
+        "shrekforsmash": "BUF",
+        "tomathor": "SSP",
+        "majoras_mask4343": "LVN",
+        "pikachuzappyzap": "SSH",
         "stumbles23": "CLV",
-        "JoltsOfEnergy": "ADA",
-        "Etesian": "LCL",
-        "yoPierre14": "PIT",
-        "Mangle faz": "GGR",
-        "CheezitzZ": "MGM",
+        "joltsofenergy": "ADA",
+        "etesian": "LCL",
+        "yopierre14": "PIT",
+        "mangle faz": "GGR",
+        "cheezitzz": "MGM",
         "blobblob88": "KSC",
-        "Autumn Leavess": "MHR",
+        "autumn leavess": "MHR",
         "ominousdraco": "CCD",
         "tiep123": "OAK",
-        "KaiWhai": "LVL",
-        "Xgamerpokestar": "NDS",
-        "MuffinknightTMA": "PBP",
-        "James(and Eevee)": "FFG"
+        "kaiwhai": "LVL",
+        "xgamerpokestar": "NDS",
+        "muffinknighttma": "PBP",
+        "james(and eevee)": "FFG"
     }
     let iclOdiv = {
-        "Ash10095": "CLS",
-        "yoPierre14": "PPS",
+        "ash10095": "CLS",
+        "yopierre14": "PPS",
         "patbingsoo": "SSK",
-        "Techno6377": "BBC",
-        "Thudgore": "TBB",
-        "Dylanronpa": "TBN",
-        "LycanShadoG": "SFS",
+        "techno6377": "BBC",
+        "thudgore": "TBB",
+        "dylanronpa": "TBN",
+        "lycanshadog": "SFS",
         "jeanmachine22": "OGS",
         "malcolm24": "MMS",
         "hax requires skill": "PIT",
@@ -530,11 +550,20 @@ async function getTableId(showdownName) {
     //Getting player's Division & Table Name
     let tableName = "";
     let div = "";
-    if (oDiv[showdownName]) {
+    let league = "";
+    fs.readFile("league.json", "utf8", (err, data) => {
+        if (err) {
+            console.log(err);
+        }
+        else {
+            league = JSON.parse(data).current;
+        }
+    })
+    if (oDiv[showdownName] && league === "WPF") {
         div = "o";
         tableName = oDiv[showdownName];
     }
-    else if (iclOdiv[showdownName]) {
+    else if (iclOdiv[showdownName] && league === "ICL") {
         div = "iclo";
         tableName = iclOdiv[showdownName];
     }
