@@ -155,8 +155,8 @@ websocket.on("message", async function incoming(data) {
         } 
         else if (linenew.startsWith("faint")) {
             if (parts[1].substring(0, 3) === "p1a") {
-                killer = p2a;
-                victim = p1a;
+                killer = p2a.split("-")[0];
+                victim = p1a.split("-")[0];
                 //updating killer info in the JSON
                 if (!killJsonp2[killer])
                     killJsonp2[killer] = 1;
@@ -169,8 +169,8 @@ websocket.on("message", async function incoming(data) {
                     deathJsonp1[victim]++;
             } 
             else {
-                killer = p1a;
-                victim = p2a;
+                killer = p1a.split("-")[0];
+		victim = p2a.split("-")[0];
                 //updating killer info in the JSON
                 if (!killJsonp1[killer])
                     killJsonp1[killer] = 1;
@@ -239,7 +239,7 @@ websocket.on("message", async function incoming(data) {
             };
             console.log("winrequest before: ", winRequest.resource.values);
             console.log("loserequest before: ", loseRequest.resource.values);
-            for (var i = 0; i < 10; i++) {
+            for (var i = 0; i < winPokeInfo.data.values.length; i++) {
                 let winPoke = winPokeInfo.data.values[i][0].split("-")[0];
                 let losePoke = losePokeInfo.data.values[i][0].split("-")[0];
                 //checking if winner & loser is player 1 or player 2
@@ -533,24 +533,25 @@ async function getTableId(showdownName) {
         "techno6377": "BBC",
         "thudgore": "TBB",
         "dylanronpa": "TBN",
-        "lycanshadog": "SFS",
+        "lycanshadowg": "SFS",
         "jeanmachine22": "OGS",
         "malcolm24": "MMS",
         "hax requires skill": "PIT",
-        "PikachuZappyZap": "SSS",
-        "ManchiniTheAmazing": "ITL",
-        "The Rissoux": "OHM",
-        "Griffin07": "RCR",
+        "pikachuzappyzap": "SSS",
+        "manchinitheamazing": "ITL",
+        "the rissoux": "OHM",
+        "griffin07": "RCR",
         "sacred_td": "LAD",
-        "MegaInfernape20": "TBL",
-        "The Traveling Guy": "JKS",
-        "Thracia12": "WVW"
+        "megainfernape20": "TBL",
+        "the traveling guy": "JKS",
+        "thracia12": "WVW"
     }
 
     //Getting player's Division & Table Name
     let tableName = "";
     let div = "";
     let league = "";
+    let lowerPSName = showdownName.toLowerCase();
     fs.readFile("league.json", "utf8", (err, data) => {
         if (err) {
             console.log(err);
@@ -559,13 +560,13 @@ async function getTableId(showdownName) {
             league = JSON.parse(data).current;
         }
     })
-    if (oDiv[showdownName] && league === "WPF") {
+    if (oDiv[lowerPSName] && league === "WPF") {
         div = "o";
-        tableName = oDiv[showdownName];
+        tableName = oDiv[lowerPSName];
     }
-    else if (iclOdiv[showdownName] && league === "ICL") {
+    else if (iclOdiv[lowerPSName] && league === "ICL") {
         div = "iclo";
-        tableName = iclOdiv[showdownName];
+        tableName = iclOdiv[lowerPSName];
     }
     /*
     else if (aDiv[showdownName]) {
@@ -588,7 +589,8 @@ async function getTableId(showdownName) {
     //else
       //  tableName = "Invalid Showdown Name";
 
-    //Getting spreadsheetID    
+    //Getting spreadsheetID
+    var spreadsheetID = "";
     switch (div) {
         case "a":
             spreadsheetID = "12BIrC-qu-TdN7UkT39FqLbGEB9nJ1ViozaoLRCf3hjY";
@@ -599,11 +601,16 @@ async function getTableId(showdownName) {
         case "d":
             spreadsheetID = "1Mmg9b9bwvjS-73QUsBba11V6Whomv9CYcV5lE3kRSPU";
         case "o":
+	    console.log("HI I'M HERE OO");
             spreadsheetID = "1zDTNDkXcrm9vYLpa2-IAVG2fRRDHJ3cYCpmS_53Ksfg";
-        case "iclo":
+	    break;
+        case "i":
+	    console.log("HI I'M HERE ICLOO");
             spreadsheetID = "17q3f52xUQ9X6z8PMwZFiXitec9s5ZY97ELfrNw5mbgc";
+	    break;
     }
-    
+   
+    console.log([spreadsheetID, tableName, div]);
     return [spreadsheetID, tableName];
 }
 
