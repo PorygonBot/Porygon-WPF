@@ -359,7 +359,7 @@ bot.on("message", async message => {
                     leagueJson.current = "ICL";
                 }
                 json = JSON.stringify(leagueJson);
-                fs.writeFile("league.json", json, "utf8");
+                fs.writeFile("league.json", json, "utf8", (err) => {console.log("written!")});
             }
         })
 
@@ -550,22 +550,24 @@ async function getTableId(showdownName) {
     //Getting player's Division & Table Name
     let tableName = "";
     let div = "";
-    let league = "";
+    let league = {};
     let lowerPSName = showdownName.toLowerCase();
     fs.readFile("league.json", "utf8", (err, data) => {
         if (err) {
             console.log(err);
         }
         else {
-            league = JSON.parse(data).current;
+            league = JSON.parse(data);
+	    console.log(league);
         }
     })
-    if (oDiv[lowerPSName] && league === "WPF") {
+    if (oDiv[lowerPSName] && league.current === "WPF") {
         div = "o";
         tableName = oDiv[lowerPSName];
     }
-    else if (iclOdiv[lowerPSName] && league === "ICL") {
-        div = "iclo";
+    else if (iclOdiv[lowerPSName] && league.current === "ICL") {
+        console.log("I'm in the right place.");
+	div = "iclo";
         tableName = iclOdiv[lowerPSName];
     }
     /*
@@ -610,7 +612,7 @@ async function getTableId(showdownName) {
 	    break;
     }
    
-    console.log([spreadsheetID, tableName, div]);
+    console.log([lowerPSName, JSON.stringify(league), spreadsheetID, tableName, div]);
     return [spreadsheetID, tableName];
 }
 
