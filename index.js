@@ -64,7 +64,7 @@ client.on('tokens', (tokens) => {
     console.log(tokens.access_token);
 });
 
-const server = app.listen(4000, () => {
+const server = app.listen(8000, () => {
     // open the browser to the authorize url to start the workflow
     console.log(authorizeUrl);
     opn(authorizeUrl, { wait: false });
@@ -189,11 +189,11 @@ websocket.on("message", async function incoming(data) {
         //|win|infernapeisawesome
         else if (linenew.startsWith(`win`)) {
             let winner = parts[1];
-            winner = ((winner === players[players.length - 2]) ? `${winner}p1` : `${winner}p2`);
+            winner = ((winner === players[0]) ? `${winner}p1` : `${winner}p2`);
             console.log(`${winner} won!`);
             console.log("Battle link: ", battlelink);
-            websocket.send(`${battlelink}|/savereplay`); //TODO finish this replay thing
-            let loser = ((winner === `${players[players.length - 2]}p1`) ? `${players[players.length - 1]}p2` : `${players[players.length - 2]}p1`);
+            //websocket.send(`${battlelink}|/savereplay`); //TODO finish this replay thing
+            let loser = ((winner === `${players[0]}p1`) ? `${players[1]}p2` : `${players[0]}p1`);
             console.log(`${loser} lost!`);
 
             console.log("Player 1 killjson: ", killJsonp1);
@@ -356,10 +356,14 @@ bot.on("message", async message => {
                     leagueJson.current = "WPF";
                 }
                 else if (serverName === "International Coaches League") {
+                    console.log("I'm in the right place up here in discord!");
                     leagueJson.current = "ICL";
                 }
                 json = JSON.stringify(leagueJson);
-                fs.writeFile("league.json", json, "utf8", (err) => {console.log("written!")});
+                fs.writeFile("league.json", json, "utf8", (err) => {
+                    if (err) console.log(err);
+                    console.log("written!")
+                });
             }
         })
 
@@ -552,22 +556,25 @@ async function getTableId(showdownName) {
     let div = "";
     let league = {};
     let lowerPSName = showdownName.toLowerCase();
-    fs.readFile("league.json", "utf8", (err, data) => {
-        if (err) {
-            console.log(err);
-        }
-        else {
-            league = JSON.parse(data);
-	    console.log(league);
-        }
+    let data = await new Promise( (res, rej) => {
+        fs.readFile("league.json", "utf8", (err, data) => {
+            if (err) {
+                rej(err)
+                return
+            }
+            res(data)
+        })
     })
+    league = JSON.parse(data);
+    console.log("yup i'm right here: " + JSON.stringify(league));
+    setTimeout(() => {console.log("waiting...")}, (500));
     if (oDiv[lowerPSName] && league.current === "WPF") {
         div = "o";
         tableName = oDiv[lowerPSName];
     }
     else if (iclOdiv[lowerPSName] && league.current === "ICL") {
         console.log("I'm in the right place.");
-	div = "iclo";
+        div = "i";
         tableName = iclOdiv[lowerPSName];
     }
     /*
@@ -589,7 +596,7 @@ async function getTableId(showdownName) {
     }
     */ //The bot is only used for Off-Season for now
     //else
-      //  tableName = "Invalid Showdown Name";
+        //  tableName = "Invalid Showdown Name";
 
     //Getting spreadsheetID
     var spreadsheetID = "";
@@ -603,15 +610,15 @@ async function getTableId(showdownName) {
         case "d":
             spreadsheetID = "1Mmg9b9bwvjS-73QUsBba11V6Whomv9CYcV5lE3kRSPU";
         case "o":
-	    console.log("HI I'M HERE OO");
+        console.log("HI I'M HERE OO");
             spreadsheetID = "1zDTNDkXcrm9vYLpa2-IAVG2fRRDHJ3cYCpmS_53Ksfg";
-	    break;
+        break;
         case "i":
-	    console.log("HI I'M HERE ICLOO");
+        console.log("HI I'M HERE ICLOO");
             spreadsheetID = "17q3f52xUQ9X6z8PMwZFiXitec9s5ZY97ELfrNw5mbgc";
-	    break;
+        break;
     }
-   
+    
     console.log([lowerPSName, JSON.stringify(league), spreadsheetID, tableName, div]);
     return [spreadsheetID, tableName];
 }
