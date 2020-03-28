@@ -64,7 +64,7 @@ client.on('tokens', (tokens) => {
     console.log(tokens.access_token);
 });
 
-const server = app.listen(4000, () => {
+const server = app.listen(8000, () => {
     // open the browser to the authorize url to start the workflow
     console.log(authorizeUrl);
     opn(authorizeUrl, { wait: false });
@@ -330,11 +330,12 @@ bot.on("message", async message => {
 
     if (channel.type === "dm") return;
     else if (
-        /*channel.id === "670749899104452608" || //Div A
+        channel.id === "690682567048953967" || //Div S
+        channel.id === "670749899104452608" || //Div A
         channel.id === "670749918851366942" || //Div B
         channel.id === "670749945757827125" || //Div C
         channel.id === "670749964451840070" || //Div D
-        */channel.id === "670749997293240334" || //Off-Season
+        channel.id === "670749997293240334" || //Off-Season
         //channel.id === "570025565504143363" || //ICL Majors
         //channel.id === "570044447279153162" || //ICL Minors
         channel.id === "682403296484392974" //ICL Off-Season
@@ -353,10 +354,13 @@ bot.on("message", async message => {
             else {
                 let leagueJson = JSON.parse(data);
                 if (serverName === "World Pokemon Federation") {
-                    leagueJson.current = "WPF";
+                    //leagueJson.current = "WPF";
+                    if (channel.id === "670749997293240334")
+                        leagueJson.current = "WPFo";
+                    else   
+                        leagueJson.current = "WPF";
                 }
                 else if (serverName === "International Coaches League") {
-                    console.log("I'm in the right place up here in discord!");
                     leagueJson.current = "ICL";
                 }
                 json = JSON.stringify(leagueJson);
@@ -438,77 +442,105 @@ const sheets = google.sheets({
 
 async function getTableId(showdownName) {
     //"showdownName":"SHEETNAME"
+    let sDiv = {
+        "ominousdraco":"CRC",
+        "hylia aria":"PIX",
+        "photonnael":"NNZ",
+        "rillab00m":"PFP",
+        "mancinitheamazing":"PPI",
+        "thejerseyfitz":"TNO",
+        "coach paddy":"IBI",
+        "mexicowallbreakers":"MCW",
+        "pabloone":"OSD",
+        "skyquake29":"LCL",
+        "techno6377":"TXM",
+        "tooxic860":"TXT",
+        "jeremy d goat":"DRC",
+        "thehonch9":"CHB",
+        "winsanity":"MSD",
+        "pikachuzappyzap":"SSH",
+        "joltsofenergy":"ADA",
+        "autumn leavess":"MAD"
+    }
     let aDiv = {
-        "CheezitzZ": "MGM",
-        "Chris_YGOPRO": "HHG",
-        "ManciniTheAmazing": "ITL",
-        "TheJerseyFitz": "TNT",
-        "joe_pick": "TXA",
-        "JoltsOfEnergy": "ADA",
-        "Hylia Aria": "PIX",
-        "Lunatic": "ACE",
-        "Majoras_Mask4343": "LVN",
-        "Kraknoix007": "PPC",
-        "Skyquake29": "LCL",
-        "stumbles23": "CLV",
-        "the real fake josh": "LAJ",
-        "TOOXIC860": "TTD",
-        "yoPierre14": "EFC",
-        "Kaitlyn74": "AOW"
+        "imdata":"EDM",
+        "fate lvl":"LVL",
+        "kiwitm":"MBM",
+        "the real fake josh":"LAJ",
+        "zimziej":"FEF",
+        "chris_ygopro":"HSH",
+        "xgamerpokestar":"AXM",
+        "austin aces":"AUS",
+        "majoras_mask4343":"LVN",
+        "kraknoix007":"PPC",
+        "gentlemanthomas97":"CHG",
+        "insanity_fang":"CBW",
+        "stumbles23":"CCR",
+        "tax 3vasion":"DWD",
+        "santahastb":"MPG",
+        "thecanadiankid":"WIN",
+        "thudgore":"BZB",
+        "cheezitzz":"MIM"
     }
     let bDiv = {
-        "PotatoZ4": "RWW",
-        "Habaduh": "GBG",
-        "x_x Insanity": "SCT",
-        "Cradily26": "COL",
-        "Jahken": "GWS",
-        "The Rissoux": "OHM",
-        "NathanDevious": "CHC",
-        "Autumn Leavess": "MHR",
-        "PikachuZappyZap": "SSH",
-        "Risky Ricky": "GSG",
-        "Fate LVL": "LVL",
-        "Tourman": "TKK",
-        "ShrekForSmash": "BUF",
-        "xgamerpokestar": "NDS",
-        "Zimziej": "RDR",
-        "Long Island Lugias": "LIL"
+        "thewinner64":"CFS",
+        "qwertyturdy":"MDT",
+        "volsareawesome23":"CHB",
+        "electacrow ":"TNV",
+        "joe_pick":"TXA",
+        "cradily26":"COL",
+        "thunderbug":"SDW",
+        "etesian":"LCL",
+        "shrekforsmash":"BUF",
+        "king hot dog w":"JRS",
+        "eveza":"SKA",
+        "james(and eevee)":"FAR",
+        "milesgustavo":"BFB",
+        "hax requires skill":"PIT",
+        "ultragoomba":"ASS",
+        "yopierre14":"EFC",
+        "jeanmachine22":"OGS",
+        "scefernape":"DTG"
     }
     let cDiv = {
-        "Rufus 623": "ABA",
-        "Etesian": "LCL",
-        "GentlemanThomas97": "CHG",
-        "Ultragoomba": "DDG",
-        "SGS_Nim": "SSG",
-        "TheHonch9": "CBL",
-        "dont click forfeit": "NNK",
-        "Coach Paddy": "III",
-        "QwertyTurdy": "MLT",
-        "RoseradeGod": "RVR",
-        "Tax 3vasion": "DWD",
-        "Ryan_Scar": "LOL",
-        "DaStarfeeeeesh": "ONP",
-        "Sacred Wings": "UUT",
-        "Techno6377": "TXM",
-        "VolsAreAwesome23": "CGB"
+        "kaiwhai":"LVL",
+        "ravens19":"CFF",
+        "az deino":"DME",
+        "everki":"BUD",
+        "sacred_td":"LAD",
+        "jahken":"GWS",
+        "arcticsomething":"AMA",
+        "epicpants18":"TMN",
+        "e24mcon":"BBP",
+        "rufus623":"ALA",
+        "pokefan4125":"DOW",
+        "the rissoux":"HHS",
+        "alvuswrath":"UFO",
+        "restless komala":"KNK",
+        "cinnabarcyndaquil":"CCQ",
+        "nathandevious":"CHC",
+        "bowser89":"3SB",
+        "mangle faz":"GGG"
     }
     let dDiv = {
-        "e24mcon": "BBP",
-        "gannon223": "CBC",
-        "umbreofxd": "NEE",
-        "infernapeisawesome": "FSN",
-        "Jeanmachine22": "OGG",
-        "jeltevl": "BPT",
-        "DeeColon": "GGZ",
-        "KaiWhai": "LVL",
-        "Mangle Faz": "GGR",
-        "The Newkbomb": "BCB",
-        "Apples in Angola": "KTK",
-        "Pabloone": "OSD",
-        "Ravens19": "CFF",
-        "sacred_td": "LAD",
-        "Hooyah Tark": "BSB",
-        "Twigz11": "WCW"
+        "sliced_bagels":"CCC",
+        "ghostxbandiit":"LAL",
+        "muffinknighttma":"PBP",
+        "deecolon":"GGZ",
+        "bubbly saint":"FBF",
+        "dont click forfeit":"NNK",
+        "quebec snordiques":"QSD",
+        "umbreoffxd":"NEE",
+        "john961":"MMN",
+        "youareapoopyhead":"NYJ",
+        "snowykurama":"CWS",
+        "infernapeisawesome":"SNS",
+        "king rucker":"BCB",
+        "redpeas1":"IIP",
+        "twigz11":"WCW",
+        "saber9402":"FCK",
+        "megainfernape20":"TBL",
+        "tapu pakoko":"CHS"
     }
     let oDiv = {
         "shrekforsmash": "BUF",
@@ -556,19 +588,19 @@ async function getTableId(showdownName) {
     let div = "";
     let league = {};
     let lowerPSName = showdownName.toLowerCase();
-    let data = await new Promise( (res, rej) => {
+    let data = await new Promise((res, rej) => {
         fs.readFile("league.json", "utf8", (err, data) => {
             if (err) {
                 rej(err)
                 return
             }
             res(data)
-        })
-    })
+        });
+    });
     league = JSON.parse(data);
     console.log("yup i'm right here: " + JSON.stringify(league));
     setTimeout(() => {console.log("waiting...")}, (500));
-    if (oDiv[lowerPSName] && league.current === "WPF") {
+    if (oDiv[lowerPSName] && league.current === "WPFo") {
         div = "o";
         tableName = oDiv[lowerPSName];
     }
@@ -577,46 +609,51 @@ async function getTableId(showdownName) {
         div = "i";
         tableName = iclOdiv[lowerPSName];
     }
-    /*
-    else if (aDiv[showdownName]) {
+    else if (sDiv[lowerPSName] && league.current === "WPF") {
+        div = "s";
+        tableName = sDiv[lowerPSName];
+    }
+    else if (aDiv[lowerPSName] && league.current === "WPF") {
         div = "a";
-        tableName = aDiv[showdownName];
+        tableName = aDiv[lowerPSName];
     }
-    else if (bDiv[showdownName]) {
+    else if (bDiv[lowerPSName] && league.current === "WPF") {
         div = "b";
-        tableName = bDiv[showdownName];
+        tableName = bDiv[lowerPSName];
     }
-    else if (cDiv[showdownName]) {
+    else if (cDiv[lowerPSName] && league.current === "WPF") {
         div = "c";
-        tableName = cDiv[showdownName];
+        tableName = cDiv[lowerPSName];
     }
-    else if (dDiv[showdownName]) {
+    else if (dDiv[lowerPSName] && league.current === "WPF") {
         div = "d";
-        tableName = dDiv[showdownName];
+        tableName = dDiv[lowerPSName];
     }
-    */ //The bot is only used for Off-Season for now
-    //else
-        //  tableName = "Invalid Showdown Name";
 
     //Getting spreadsheetID
     var spreadsheetID = "";
     switch (div) {
+        case "s":
+            spreadsheetID = "1r3-76BRUHOb7MS4GGWWS91QuuWKk5yv5gJklh2Ea1d4";
+            break;
         case "a":
-            spreadsheetID = "12BIrC-qu-TdN7UkT39FqLbGEB9nJ1ViozaoLRCf3hjY";
+            spreadsheetID = "1ZCopR1Guv3qEJ6pblfFIAMs32HvnU_-aKbbbtAu4Ylc";
+            break;
         case "b":
-            spreadsheetID = "1n5mHaL-T3tKTCtuqlldocOlacxun1yjsnw2gvNeO0l4";
+            spreadsheetID = "1UjmyFrPhgAh6N342dF0ZznnnFdLkkVIYo5_668Rwqh4";
+            break;
         case "c":
-            spreadsheetID = "1Mmg9b9bwvjS-73QUsBba11V6Whomv9CYcV5lE3kRSPU";
+            spreadsheetID = "1iu6Qr6Wt-nNlq60frWRiskDwY6oEIlT5_qOkWpvmL5g";
+            break;
         case "d":
-            spreadsheetID = "1Mmg9b9bwvjS-73QUsBba11V6Whomv9CYcV5lE3kRSPU";
+            spreadsheetID = "17sDhBUjtNt6XMgsDVikID2b9bWC2wsnqFa5BXF10uqc";
+            break;
         case "o":
-        console.log("HI I'M HERE OO");
             spreadsheetID = "1zDTNDkXcrm9vYLpa2-IAVG2fRRDHJ3cYCpmS_53Ksfg";
-        break;
+            break;
         case "i":
-        console.log("HI I'M HERE ICLOO");
             spreadsheetID = "17q3f52xUQ9X6z8PMwZFiXitec9s5ZY97ELfrNw5mbgc";
-        break;
+            break;
     }
     
     console.log([lowerPSName, JSON.stringify(league), spreadsheetID, tableName, div]);
