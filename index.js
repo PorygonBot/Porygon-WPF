@@ -64,7 +64,7 @@ client.on('tokens', (tokens) => {
     console.log(tokens.access_token);
 });
 
-const server = app.listen(8000, () => {
+const server = app.listen(4000, () => {
     // open the browser to the authorize url to start the workflow
     console.log(authorizeUrl);
     opn(authorizeUrl, { wait: false });
@@ -531,7 +531,7 @@ async function getTableId(showdownName) {
         "james(and eevee)": "FFG"
     }
     let iclOdiv = {
-        "ash10095": "CLS",
+        "ash100985": "CLS",
         "yopierre14": "PPS",
         "patbingsoo": "SSK",
         "techno6377": "BBC",
