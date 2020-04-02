@@ -64,7 +64,7 @@ client.on('tokens', (tokens) => {
     console.log(tokens.access_token);
 });
 
-const server = app.listen(8000, () => {
+const server = app.listen(4000, () => {
     // open the browser to the authorize url to start the workflow
     console.log(authorizeUrl);
     opn(authorizeUrl, { wait: false });
@@ -189,11 +189,11 @@ websocket.on("message", async function incoming(data) {
         //|win|infernapeisawesome
         else if (linenew.startsWith(`win`)) {
             let winner = parts[1];
-            winner = ((winner === players[0]) ? `${winner}p1` : `${winner}p2`);
+            winner = ((winner === players[players.length - 2]) ? `${winner}p1` : `${winner}p2`);
             console.log(`${winner} won!`);
             console.log("Battle link: ", battlelink);
             //websocket.send(`${battlelink}|/savereplay`); //TODO finish this replay thing
-            let loser = ((winner === `${players[0]}p1`) ? `${players[1]}p2` : `${players[0]}p1`);
+            let loser = ((winner.endsWith("p1")) ? `${players[players.length - 1]}p2` : `${players[players.length - 2]}p1`);
             console.log(`${loser} lost!`);
 
             console.log("Player 1 killjson: ", killJsonp1);
@@ -574,7 +574,7 @@ async function getTableId(showdownName) {
         "malcolm24": "MMS",
         "hax requires skill": "PIT",
         "pikachuzappyzap": "SSS",
-        "manchinitheamazing": "ITL",
+        "mancinitheamazing": "ITL",
         "the rissoux": "OHM",
         "griffin07": "RCR",
         "sacred_td": "LAD",
